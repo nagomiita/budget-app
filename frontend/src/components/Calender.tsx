@@ -6,17 +6,24 @@ import { calculateDailyBalances } from "@/utils/financeCalculations";
 import { Balance, CalenderContent, Transaction } from "@/types";
 import { formatCurrency } from "@/utils/formatting";
 import interactionPlugin, { DateClickArg } from "@fullcalendar/interaction";
+import { Palette } from "@mui/icons-material";
+import { useTheme } from "@mui/material";
+import { isSameMonth } from "date-fns";
 
 interface CalenderProps {
   monthlyTransactions: Transaction[];
   setcurrentMonth: React.Dispatch<React.SetStateAction<Date>>;
   setCurrentDay: React.Dispatch<React.SetStateAction<string>>;
+  currentDay: string;
+  today: string;
 }
 
 const Calender = ({
   monthlyTransactions,
   setcurrentMonth,
   setCurrentDay,
+  currentDay,
+  today,
 }: CalenderProps) => {
   const renderEventContent = (eventInfo: EventContentArg) => {
     return (
@@ -51,11 +58,24 @@ const Calender = ({
   const CalenderEvents = createCalenderEvents(dailyBalances);
 
   const handleDateSet = (datesetInfo: DatesSetArg) => {
-    setcurrentMonth(datesetInfo.view.currentStart);
+    const currentMonth = datesetInfo.view.currentStart;
+    setcurrentMonth(currentMonth);
+    const todayDate = new Date();
+    if (isSameMonth(todayDate, currentMonth)) {
+      setCurrentDay(today);
+    }
   };
 
   const handleDateClick = (dateInfo: DateClickArg) => {
     setCurrentDay(dateInfo.dateStr);
+  };
+
+  const theme = useTheme();
+
+  const backgroundEvent = {
+    start: currentDay,
+    display: "background",
+    backgroundColor: theme.palette.balanceColor.light,
   };
 
   return (
@@ -63,7 +83,7 @@ const Calender = ({
       locale="ja"
       plugins={[dayGridPlugin, interactionPlugin]}
       initialView="dayGridMonth"
-      events={CalenderEvents}
+      events={[...CalenderEvents, backgroundEvent]}
       eventContent={renderEventContent}
       datesSet={handleDateSet}
       dateClick={handleDateClick}
