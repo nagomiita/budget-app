@@ -20,14 +20,22 @@ import SpaIcon from "@mui/icons-material/Spa";
 import WorkIcon from "@mui/icons-material/Work";
 import AddBusinessIcon from "@mui/icons-material/AddBusiness";
 import SavingsIcon from "@mui/icons-material/Savings";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
-import { ExpenseCategory, IncomeCategory } from "@/types";
+import { ExpenseCategory, IncomeCategory, Transaction } from "@/types";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Schema, transactionSchema } from "@/validations/schema";
 
 interface TransactionFormProps {
   onCloseForm: () => void;
   isEntryDrawerOpen: boolean;
   currentDay: string;
+  onSaveTransaction: (transaction: Schema) => Promise<void>;
+  selectedTransaction: Transaction | null;
+  setSelectedTransaction: React.Dispatch<
+    React.SetStateAction<Transaction | null>
+  >;
+  onDeleteTransaction: (transactionId: string) => Promise<void>;
 }
 type IncomeExpense = "income" | "expense";
 
@@ -40,6 +48,10 @@ const TransactionForm = ({
   onCloseForm,
   isEntryDrawerOpen,
   currentDay,
+  onSaveTransaction,
+  selectedTransaction,
+  setSelectedTransaction,
+  onDeleteTransaction,
 }: TransactionFormProps) => {
   const formWidth = 320;
 
@@ -53,7 +65,7 @@ const TransactionForm = ({
     { label: "その他", icon: <SpaIcon fontSize="small" /> },
   ];
 
-  const ioncomeCategories: CategoryItem[] = [
+  const incomeCategories: CategoryItem[] = [
     { label: "給与", icon: <WorkIcon fontSize="small" /> },
     { label: "副収入", icon: <AddBusinessIcon fontSize="small" /> },
     { label: "お小遣い", icon: <SavingsIcon fontSize="small" /> },
@@ -61,7 +73,14 @@ const TransactionForm = ({
 
   const [categories, setCategories] = useState(expenseCategories);
 
-  const { control, setValue, watch } = useForm({
+  const {
+    control,
+    setValue,
+    watch,
+    formState: { errors },
+    handleSubmit,
+    reset,
+  } = useForm<Schema>({
     defaultValues: {
       type: "expense",
       date: currentDay,
@@ -69,10 +88,13 @@ const TransactionForm = ({
       category: "",
       content: "",
     },
+    resolver: zodResolver(transactionSchema),
   });
 
+  //収支タイプを切り替える関数
   const incomeExpenseToggle = (type: IncomeExpense) => {
     setValue("type", type);
+    setValue("category", "");
   };
 
   const currentType = watch("type");
@@ -83,9 +105,50 @@ const TransactionForm = ({
 
   useEffect(() => {
     const newCategories =
-      currentType === "expense" ? expenseCategories : ioncomeCategories;
+      currentType === "expense" ? expenseCategories : incomeCategories;
     setCategories(newCategories);
   }, [currentType]);
+
+  const onSubmit: SubmitHandler<Schema> = async (data) => {
+    await onSaveTransaction(data);
+
+    reset({
+      type: "expense",
+      date: currentDay,
+      amount: 0,
+      category: "",
+      content: "",
+    });
+  };
+
+  useEffect(() => {
+    if (selectedTransaction) {
+      setValue("type", selectedTransaction.type);
+      setValue("date", selectedTransaction.date);
+      setValue("amount", selectedTransaction.amount);
+      setValue("category", selectedTransaction.category);
+      setValue("content", selectedTransaction.content);
+    } else {
+      reset({
+        type: "expense",
+        date: currentDay,
+        amount: 0,
+        category: "",
+        content: "",
+      });
+    }
+  }, [selectedTransaction]);
+
+  const handleDelete = async () => {
+    if (selectedTransaction) {
+      try {
+        await onDeleteTransaction(selectedTransaction.id);
+        setSelectedTransaction(null);
+      } catch (error) {
+        console.error("Error deleting transaction:", error);
+      }
+    }
+  };
 
   return (
     <Box
@@ -121,7 +184,7 @@ const TransactionForm = ({
         </IconButton>
       </Box>
       {/* フォーム要素 */}
-      <Box component={"form"}>
+      <Box component={"form"} onSubmit={handleSubmit(onSubmit)}>
         <Stack spacing={2}>
           {/* 収支切り替えボタン */}
           <Controller
@@ -161,6 +224,8 @@ const TransactionForm = ({
                     shrink: true,
                   },
                 }}
+                error={!!errors.date}
+                helperText={errors.date?.message}
               />
             )}
           />
@@ -170,7 +235,14 @@ const TransactionForm = ({
             name="category"
             control={control}
             render={({ field }) => (
-              <TextField {...field} id="カテゴリ" label="カテゴリ" select>
+              <TextField
+                error={!!errors.category}
+                helperText={errors.category?.message}
+                {...field}
+                id="カテゴリ"
+                label="カテゴリ"
+                select
+              >
                 {categories.map((category, index) => (
                   <MenuItem key={index} value={category.label}>
                     <ListItemIcon>{category.icon}</ListItemIcon>
@@ -186,6 +258,8 @@ const TransactionForm = ({
             control={control}
             render={({ field }) => (
               <TextField
+                error={!!errors.amount}
+                helperText={errors.amount?.message}
                 {...field}
                 value={field.value === 0 ? "" : field.value}
                 onChange={(e) => {
@@ -202,7 +276,13 @@ const TransactionForm = ({
             name="content"
             control={control}
             render={({ field }) => (
-              <TextField {...field} label="内容" type="text" />
+              <TextField
+                error={!!errors.content}
+                helperText={errors.content?.message}
+                {...field}
+                label="内容"
+                type="text"
+              />
             )}
           />
           {/* 保存ボタン */}
@@ -214,6 +294,17 @@ const TransactionForm = ({
           >
             保存
           </Button>
+          {/* 削除ボタン */}
+          {selectedTransaction && (
+            <Button
+              onClick={handleDelete}
+              variant="outlined"
+              color={"secondary"}
+              fullWidth
+            >
+              削除
+            </Button>
+          )}
         </Stack>
       </Box>
     </Box>

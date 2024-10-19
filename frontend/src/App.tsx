@@ -8,9 +8,11 @@ import { ThemeProvider } from "@emotion/react";
 import { CssBaseline } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Transaction } from "./types";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, addDoc } from "firebase/firestore";
 import { db } from "./firebase";
 import { formatMonth } from "./utils/formatting";
+import { Schema } from "./validations/schema";
+import { doc, deleteDoc } from "firebase/firestore";
 
 function App() {
   //Firestoreエラーかどうかを判定する型ガード
@@ -47,6 +49,44 @@ function App() {
     return transaction.date.startsWith(formatMonth(currentMonth));
   });
 
+  const handleSaveTransaction = async (transaction: Schema) => {
+    try {
+      const docRef = await addDoc(collection(db, "Transactions"), transaction);
+      console.log("Document written with ID: ", docRef.id);
+
+      const newTransaction = {
+        id: docRef.id,
+        ...transaction,
+      } as Transaction;
+      setTransactions((prevTransactions) => [
+        ...prevTransactions,
+        newTransaction,
+      ]);
+    } catch (err) {
+      if (isFireStoreError(err)) {
+        console.error(err.message);
+      } else {
+        console.log("クライアント側のエラーです。", err);
+      }
+    }
+  };
+
+  const handleDeleteTransaction = async (transactionId: string) => {
+    try {
+      await deleteDoc(doc(db, "Transactions", transactionId));
+      const filteredTransactions = transactions.filter(
+        (transaction) => transaction.id !== transactionId
+      );
+      setTransactions(filteredTransactions);
+    } catch (err) {
+      if (isFireStoreError(err)) {
+        console.error(err.message);
+      } else {
+        console.log("クライアント側のエラーです。", err);
+      }
+    }
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -59,6 +99,8 @@ function App() {
                 <Home
                   monthlyTransactions={monthlyTransactions}
                   setcurrentMonth={setcurrentMonth}
+                  onSaveTransaction={handleSaveTransaction}
+                  onDeleteTransaction={handleDeleteTransaction}
                 />
               }
             />
