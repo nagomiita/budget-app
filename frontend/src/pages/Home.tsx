@@ -10,7 +10,7 @@ import { Schema } from "@/validations/schema";
 
 interface HomeProps {
   monthlyTransactions: Transaction[];
-  setcurrentMonth: React.Dispatch<React.SetStateAction<Date>>;
+  setCurrentMonth: React.Dispatch<React.SetStateAction<Date>>;
   onSaveTransaction: (transaction: Schema) => Promise<void>;
   onDeleteTransaction: (transactionId: string) => Promise<void>;
   onUpdateTransaction: (
@@ -21,7 +21,7 @@ interface HomeProps {
 
 const Home = ({
   monthlyTransactions,
-  setcurrentMonth,
+  setCurrentMonth,
   onSaveTransaction,
   onDeleteTransaction,
   onUpdateTransaction,
@@ -59,7 +59,7 @@ const Home = ({
         <MonthlySummary monthlyTransactions={monthlyTransactions} />
         <Calender
           monthlyTransactions={monthlyTransactions}
-          setcurrentMonth={setcurrentMonth}
+          setCurrentMonth={setCurrentMonth}
           setCurrentDay={setCurrentDay}
           currentDay={currentDay}
           today={today}

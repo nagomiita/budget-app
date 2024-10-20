@@ -1,3 +1,7 @@
+import { Transaction } from "@/types";
+import { calculateDailyBalances } from "@/utils/financeCalculations";
+import { Box, Typography, useTheme } from "@mui/material";
+import CircularProgress from "@mui/material/CircularProgress";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -6,8 +10,14 @@ import {
   Title,
   Tooltip,
   Legend,
+  ChartData,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
+
+interface BarChartProps {
+  monthlyTransactions: Transaction[];
+  isLocading: boolean;
+}
 
 ChartJS.register(
   CategoryScale,
@@ -18,45 +28,59 @@ ChartJS.register(
   Legend
 );
 
-const options = {
-  maintainAspectRatio: false,
-  responsive: true,
-  plugins: {
-    title: {
-      display: true,
-      text: "日別収支",
+const BarChart = ({ monthlyTransactions, isLocading }: BarChartProps) => {
+  const theme = useTheme();
+  const options = {
+    maintainAspectRatio: false,
+    responsive: true,
+    plugins: {
+      title: {
+        display: true,
+        text: "日別収支",
+      },
     },
-  },
-};
+  };
 
-const labels = [
-  "2024-01-10",
-  "2024-01-11",
-  "2024-01-12",
-  "2024-01-13",
-  "2024-01-14",
-  "2024-01-15",
-  "2024-01-16",
-];
+  const dailyBalances = calculateDailyBalances(monthlyTransactions);
 
-const data = {
-  labels,
-  datasets: [
-    {
-      label: "支出",
-      data: [200, 300, 400, 300, 200, 333, 444],
-      backgroundColor: "rgba(255, 99, 132, 0.5)",
-    },
-    {
-      label: "収入",
-      data: [200, 300, 400, 300, 200, 333, 444],
-      backgroundColor: "rgba(53, 162, 235, 0.5)",
-    },
-  ],
-};
+  const dateLabels = Object.keys(dailyBalances).sort();
 
-const BarChart = () => {
-  return <Bar options={options} data={data} />;
+  const expenseData = dateLabels.map((day) => dailyBalances[day].expense);
+  const incomeData = dateLabels.map((day) => dailyBalances[day].income);
+
+  const data: ChartData<"bar"> = {
+    labels: dateLabels,
+    datasets: [
+      {
+        label: "支出",
+        data: expenseData,
+        backgroundColor: theme.palette.expenseColor.light,
+      },
+      {
+        label: "収入",
+        data: incomeData,
+        backgroundColor: theme.palette.incomeColor.light,
+      },
+    ],
+  };
+  return (
+    <Box
+      sx={{
+        flexGrow: 1,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      {isLocading ? (
+        <CircularProgress />
+      ) : monthlyTransactions.length > 0 ? (
+        <Bar options={options} data={data} />
+      ) : (
+        <Typography>データがありません</Typography>
+      )}
+    </Box>
+  );
 };
 
 export default BarChart;

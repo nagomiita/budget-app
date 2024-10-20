@@ -6,24 +6,24 @@ import { ja } from "date-fns/locale";
 
 interface MonthSelectorProps {
   currentMonth: Date;
-  setcurrentMonth: React.Dispatch<React.SetStateAction<Date>>;
+  setCurrentMonth: React.Dispatch<React.SetStateAction<Date>>;
 }
 
 const MonthSelector = ({
   currentMonth,
-  setcurrentMonth,
+  setCurrentMonth,
 }: MonthSelectorProps) => {
   const handlePreviousMonth = () => {
     const previousMonth = addMonths(currentMonth, -1);
-    setcurrentMonth(previousMonth);
+    setCurrentMonth(previousMonth);
   };
   const handleNextMonth = () => {
     const nextMonth = addMonths(currentMonth, 1);
-    setcurrentMonth(nextMonth);
+    setCurrentMonth(nextMonth);
   };
   const handleDateChange = (newDate: Date | null) => {
     if (newDate) {
-      setcurrentMonth(newDate);
+      setCurrentMonth(newDate);
     }
   };
   return (

@@ -11,7 +11,7 @@ import { isSameMonth } from "date-fns";
 
 interface CalenderProps {
   monthlyTransactions: Transaction[];
-  setcurrentMonth: React.Dispatch<React.SetStateAction<Date>>;
+  setCurrentMonth: React.Dispatch<React.SetStateAction<Date>>;
   setCurrentDay: React.Dispatch<React.SetStateAction<string>>;
   currentDay: string;
   today: string;
@@ -19,7 +19,7 @@ interface CalenderProps {
 
 const Calender = ({
   monthlyTransactions,
-  setcurrentMonth,
+  setCurrentMonth,
   setCurrentDay,
   currentDay,
   today,
@@ -58,7 +58,7 @@ const Calender = ({
 
   const handleDateSet = (datesetInfo: DatesSetArg) => {
     const currentMonth = datesetInfo.view.currentStart;
-    setcurrentMonth(currentMonth);
+    setCurrentMonth(currentMonth);
     const todayDate = new Date();
     if (isSameMonth(todayDate, currentMonth)) {
       setCurrentDay(today);

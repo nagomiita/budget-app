@@ -274,9 +274,12 @@ const TransactionForm = ({
                 error={!!errors.category}
                 helperText={errors.category?.message}
                 {...field}
-                id="カテゴリ"
                 label="カテゴリ"
                 select
+                slotProps={{
+                  inputLabel: { htmlFor: "category" },
+                  htmlInput: { id: "category" },
+                }}
               >
                 {categories.map((category, index) => (
                   <MenuItem key={index} value={category.label}>

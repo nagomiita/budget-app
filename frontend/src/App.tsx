@@ -28,7 +28,8 @@ function App() {
     return typeof err === "object" && err !== null && "code" in err;
   }
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [currentMonth, setcurrentMonth] = useState(new Date());
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [isLocading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetcheTransactions = async () => {
@@ -47,10 +48,14 @@ function App() {
         } else {
           console.log("クライアント側のエラーです。", err);
         }
+      } finally {
+        setIsLoading(false);
       }
     };
     fetcheTransactions();
   }, []);
+
+  //ひと月分の収支
   const monthlyTransactions = transactions.filter((transaction) => {
     return transaction.date.startsWith(formatMonth(currentMonth));
   });
@@ -124,7 +129,7 @@ function App() {
               element={
                 <Home
                   monthlyTransactions={monthlyTransactions}
-                  setcurrentMonth={setcurrentMonth}
+                  setCurrentMonth={setCurrentMonth}
                   onSaveTransaction={handleSaveTransaction}
                   onDeleteTransaction={handleDeleteTransaction}
                   onUpdateTransaction={handleUpdateTransaction}
@@ -136,7 +141,9 @@ function App() {
               element={
                 <Report
                   currentMonth={currentMonth}
-                  setcurrentMonth={setcurrentMonth}
+                  setCurrentMonth={setCurrentMonth}
+                  monthlyTransactions={monthlyTransactions}
+                  isLocading={isLocading}
                 />
               }
             />

@@ -2,17 +2,25 @@ import BarChart from "@/components/BarChart";
 import CategoryChart from "@/components/CategoryChart";
 import MonthSelector from "@/components/MonthSelector";
 import TransactionTable from "@/components/TransactionTable";
+import { Transaction } from "@/types";
 import { Paper } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 
 interface ReportProps {
   currentMonth: Date;
-  setcurrentMonth: React.Dispatch<React.SetStateAction<Date>>;
+  setCurrentMonth: React.Dispatch<React.SetStateAction<Date>>;
+  monthlyTransactions: Transaction[];
+  isLocading: boolean;
 }
 
-const Report = ({ currentMonth, setcurrentMonth }: ReportProps) => {
+const Report = ({
+  currentMonth,
+  setCurrentMonth,
+  monthlyTransactions,
+  isLocading,
+}: ReportProps) => {
   const commonPaperStyle = {
-    height: { xs: "auto", md: "400px" },
+    height: "400px",
     display: "flex",
     flexDirection: "column",
     p: 2,
@@ -22,7 +30,7 @@ const Report = ({ currentMonth, setcurrentMonth }: ReportProps) => {
       <Grid size={{ xs: 12 }}>
         <MonthSelector
           currentMonth={currentMonth}
-          setcurrentMonth={setcurrentMonth}
+          setCurrentMonth={setCurrentMonth}
         />
       </Grid>
       <Grid size={{ xs: 12, md: 4 }}>
@@ -32,7 +40,10 @@ const Report = ({ currentMonth, setcurrentMonth }: ReportProps) => {
       </Grid>
       <Grid size={{ xs: 12, md: 8 }}>
         <Paper sx={commonPaperStyle}>
-          <BarChart />
+          <BarChart
+            monthlyTransactions={monthlyTransactions}
+            isLocading={isLocading}
+          />
         </Paper>
       </Grid>
       <Grid size={{ xs: 12 }}>
