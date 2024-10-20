@@ -6,7 +6,6 @@ import { calculateDailyBalances } from "@/utils/financeCalculations";
 import { Balance, CalenderContent, Transaction } from "@/types";
 import { formatCurrency } from "@/utils/formatting";
 import interactionPlugin, { DateClickArg } from "@fullcalendar/interaction";
-import { Palette } from "@mui/icons-material";
 import { useTheme } from "@mui/material";
 import { isSameMonth } from "date-fns";
 

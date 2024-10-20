@@ -131,7 +131,15 @@ function App() {
                 />
               }
             />
-            <Route path="/report" element={<Report />} />
+            <Route
+              path="/report"
+              element={
+                <Report
+                  currentMonth={currentMonth}
+                  setcurrentMonth={setcurrentMonth}
+                />
+              }
+            />
             <Route path="*" element={<NoMatch />} />
           </Route>
         </Routes>

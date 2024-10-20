@@ -73,6 +73,7 @@ export default function AppLayout() {
           flexGrow: 1,
           p: 3,
           width: { md: `calc(100% - ${drawerWidth}px)` },
+          backgroundColor: "#f5f5f5",
         }}
       >
         <Toolbar />
