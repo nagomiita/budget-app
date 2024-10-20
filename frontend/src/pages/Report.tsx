@@ -35,7 +35,10 @@ const Report = ({
       </Grid>
       <Grid size={{ xs: 12, md: 4 }}>
         <Paper sx={commonPaperStyle}>
-          <CategoryChart />
+          <CategoryChart
+            monthlyTransactions={monthlyTransactions}
+            isLocading={isLocading}
+          />
         </Paper>
       </Grid>
       <Grid size={{ xs: 12, md: 8 }}>

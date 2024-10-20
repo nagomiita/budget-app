@@ -1,47 +1,119 @@
-import { TransactionType } from "@/types";
-import { Box, MenuItem, TextField } from "@mui/material";
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+import {
+  ExpenseCategory,
+  IncomeCategory,
+  Transaction,
+  TransactionType,
+} from "@/types";
+import {
+  Box,
+  CircularProgress,
+  MenuItem,
+  TextField,
+  Typography,
+  useTheme,
+} from "@mui/material";
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+  ChartData,
+} from "chart.js";
 import { useState } from "react";
 import { Pie } from "react-chartjs-2";
 
-ChartJS.register(ArcElement, Tooltip, Legend);
-const CategoryChart = () => {
-  const data = {
-    labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
-    datasets: [
-      {
-        label: "# of Votes",
-        data: [12, 19, 3, 5, 2, 3],
-        backgroundColor: [
-          "rgba(255, 99, 132, 0.2)",
-          "rgba(54, 162, 235, 0.2)",
-          "rgba(255, 206, 86, 0.2)",
-          "rgba(75, 192, 192, 0.2)",
-          "rgba(153, 102, 255, 0.2)",
-          "rgba(255, 159, 64, 0.2)",
-        ],
-        borderColor: [
-          "rgba(255, 99, 132, 1)",
-          "rgba(54, 162, 235, 1)",
-          "rgba(255, 206, 86, 1)",
-          "rgba(75, 192, 192, 1)",
-          "rgba(153, 102, 255, 1)",
-          "rgba(255, 159, 64, 1)",
-        ],
-        borderWidth: 1,
-      },
-    ],
-  };
+interface CategoryChartProps {
+  monthlyTransactions: Transaction[];
+  isLocading: boolean;
+}
 
+ChartJS.register(ArcElement, Tooltip, Legend);
+const CategoryChart = ({
+  monthlyTransactions,
+  isLocading,
+}: CategoryChartProps) => {
+  const theme = useTheme();
   const [selectedType, setSelectedType] = useState<TransactionType>("expense");
+
+  const options = {
+    maintainAspectRatio: false,
+    responsive: true,
+    plugins: {
+      title: {
+        display: true,
+      },
+    },
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     setSelectedType(e.target.value as TransactionType);
   };
+
+  const categorySums = monthlyTransactions
+    .filter((transaction) => transaction.type === selectedType)
+    .reduce<Record<IncomeCategory | ExpenseCategory, number>>(
+      (acc, transaction) => {
+        if (!acc[transaction.category]) {
+          acc[transaction.category] = 0;
+        }
+        acc[transaction.category] += transaction.amount;
+        return acc;
+      },
+      {} as Record<IncomeCategory | ExpenseCategory, number>
+    );
+
+  const categoryLabels = Object.keys(categorySums) as (
+    | IncomeCategory
+    | ExpenseCategory
+  )[];
+
+  const categoryValues = Object.values(categorySums);
+
+  const incomeCategoryColor: Record<IncomeCategory, string> = {
+    給与: theme.palette.incomeCategoryColor.給与,
+    副収入: theme.palette.incomeCategoryColor.副収入,
+    お小遣い: theme.palette.incomeCategoryColor.お小遣い,
+  };
+  const expenseCategoryColor: Record<ExpenseCategory, string> = {
+    食費: theme.palette.expenseCategoryColor.食費,
+    日用品: theme.palette.expenseCategoryColor.日用品,
+    住居費: theme.palette.expenseCategoryColor.住居費,
+    交際費: theme.palette.expenseCategoryColor.交際費,
+    娯楽: theme.palette.expenseCategoryColor.娯楽,
+    交通費: theme.palette.expenseCategoryColor.交通費,
+    その他: theme.palette.expenseCategoryColor.その他,
+  };
+
+  const getCategoryColor = (
+    category: IncomeCategory | ExpenseCategory
+  ): string => {
+    if (selectedType === "income") {
+      return incomeCategoryColor[category as IncomeCategory];
+    } else {
+      return expenseCategoryColor[category as ExpenseCategory];
+    }
+  };
+
+  const data: ChartData<"pie"> = {
+    labels: categoryLabels,
+    datasets: [
+      {
+        data: categoryValues,
+        backgroundColor: categoryLabels.map((category) =>
+          getCategoryColor(category)
+        ),
+        borderColor: categoryLabels.map((category) =>
+          getCategoryColor(category)
+        ),
+        borderWidth: 1,
+      },
+    ],
+  };
+
   return (
-    <Box>
+    <>
       <TextField
         label="収支の種類"
         select
@@ -56,8 +128,23 @@ const CategoryChart = () => {
         <MenuItem value={"income"}>収入</MenuItem>
         <MenuItem value={"expense"}>支出</MenuItem>
       </TextField>
-      <Pie data={data} />
-    </Box>
+      <Box
+        sx={{
+          flexGrow: 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        {isLocading ? (
+          <CircularProgress />
+        ) : monthlyTransactions.length > 0 ? (
+          <Pie data={data} options={options} />
+        ) : (
+          <Typography>データがありません</Typography>
+        )}
+      </Box>
+    </>
   );
 };
 
