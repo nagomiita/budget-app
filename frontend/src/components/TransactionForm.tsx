@@ -36,6 +36,10 @@ interface TransactionFormProps {
     React.SetStateAction<Transaction | null>
   >;
   onDeleteTransaction: (transactionId: string) => Promise<void>;
+  onUpdateTransaction: (
+    transaction: Schema,
+    transactionId: string
+  ) => Promise<void>;
 }
 type IncomeExpense = "income" | "expense";
 
@@ -52,6 +56,7 @@ const TransactionForm = ({
   selectedTransaction,
   setSelectedTransaction,
   onDeleteTransaction,
+  onUpdateTransaction,
 }: TransactionFormProps) => {
   const formWidth = 320;
 
@@ -103,14 +108,33 @@ const TransactionForm = ({
     setValue("date", currentDay);
   }, [currentDay]);
 
+  //収支タイプに応じたカテゴリを取得
   useEffect(() => {
     const newCategories =
       currentType === "expense" ? expenseCategories : incomeCategories;
     setCategories(newCategories);
   }, [currentType]);
 
+  //保存・更新処理関数
   const onSubmit: SubmitHandler<Schema> = async (data) => {
-    await onSaveTransaction(data);
+    if (selectedTransaction) {
+      onUpdateTransaction(data, selectedTransaction.id)
+        .then(() => {
+          console.log("更新しました");
+          setSelectedTransaction(null);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    } else {
+      await onSaveTransaction(data)
+        .then(() => {
+          console.log("保存しました");
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
 
     reset({
       type: "expense",
@@ -123,10 +147,21 @@ const TransactionForm = ({
 
   useEffect(() => {
     if (selectedTransaction) {
+      const categoryExists = categories.some(
+        (category) => category.label === selectedTransaction.category
+      );
+      //カテゴリーのみフォームの更新時にバリデーションエラーが出る可能性があるため、カテゴリの選択肢の更新後に行う
+      setValue("category", categoryExists ? selectedTransaction.category : "");
+    }
+  }, [selectedTransaction, categories]);
+
+  //フォーム内容を更新
+  useEffect(() => {
+    if (selectedTransaction) {
       setValue("type", selectedTransaction.type);
       setValue("date", selectedTransaction.date);
       setValue("amount", selectedTransaction.amount);
-      setValue("category", selectedTransaction.category);
+
       setValue("content", selectedTransaction.content);
     } else {
       reset({
@@ -292,7 +327,7 @@ const TransactionForm = ({
             color={currentType === "income" ? "primary" : "error"}
             fullWidth
           >
-            保存
+            {selectedTransaction ? "更新" : "保存"}
           </Button>
           {/* 削除ボタン */}
           {selectedTransaction && (

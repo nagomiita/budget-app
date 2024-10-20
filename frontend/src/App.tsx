@@ -8,11 +8,17 @@ import { ThemeProvider } from "@emotion/react";
 import { CssBaseline } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Transaction } from "./types";
-import { collection, getDocs, addDoc } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  addDoc,
+  doc,
+  deleteDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "./firebase";
 import { formatMonth } from "./utils/formatting";
 import { Schema } from "./validations/schema";
-import { doc, deleteDoc } from "firebase/firestore";
 
 function App() {
   //Firestoreエラーかどうかを判定する型ガード
@@ -87,6 +93,26 @@ function App() {
     }
   };
 
+  const handleUpdateTransaction = async (
+    transaction: Schema,
+    transactionId: string
+  ) => {
+    try {
+      const docRef = doc(db, "Transactions", transactionId);
+      await updateDoc(docRef, transaction);
+      const updatedTramsactions = transactions.map((t) =>
+        t.id === transactionId ? { ...t, ...transaction } : t
+      ) as Transaction[];
+      setTransactions(updatedTramsactions);
+    } catch (err) {
+      if (isFireStoreError(err)) {
+        console.error(err.message);
+      } else {
+        console.log("クライアント側のエラーです。", err);
+      }
+    }
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -101,6 +127,7 @@ function App() {
                   setcurrentMonth={setcurrentMonth}
                   onSaveTransaction={handleSaveTransaction}
                   onDeleteTransaction={handleDeleteTransaction}
+                  onUpdateTransaction={handleUpdateTransaction}
                 />
               }
             />
