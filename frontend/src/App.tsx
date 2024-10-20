@@ -82,11 +82,18 @@ function App() {
     }
   };
 
-  const handleDeleteTransaction = async (transactionId: string) => {
+  const handleDeleteTransaction = async (
+    transactionIds: string | readonly string[]
+  ) => {
     try {
-      await deleteDoc(doc(db, "Transactions", transactionId));
+      const idsToDelete = Array.isArray(transactionIds)
+        ? transactionIds
+        : [transactionIds];
+      for (const id of idsToDelete) {
+        await deleteDoc(doc(db, "Transactions", id));
+      }
       const filteredTransactions = transactions.filter(
-        (transaction) => transaction.id !== transactionId
+        (transaction) => !idsToDelete.includes(transaction.id)
       );
       setTransactions(filteredTransactions);
     } catch (err) {
@@ -144,6 +151,7 @@ function App() {
                   setCurrentMonth={setCurrentMonth}
                   monthlyTransactions={monthlyTransactions}
                   isLocading={isLocading}
+                  onDeleteTransaction={handleDeleteTransaction}
                 />
               }
             />

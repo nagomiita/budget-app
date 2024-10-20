@@ -15,6 +15,7 @@ interface CalenderProps {
   setCurrentDay: React.Dispatch<React.SetStateAction<string>>;
   currentDay: string;
   today: string;
+  onDateClick: (dateInfo: DateClickArg) => void;
 }
 
 const Calender = ({
@@ -23,6 +24,7 @@ const Calender = ({
   setCurrentDay,
   currentDay,
   today,
+  onDateClick,
 }: CalenderProps) => {
   const renderEventContent = (eventInfo: EventContentArg) => {
     return (
@@ -65,10 +67,6 @@ const Calender = ({
     }
   };
 
-  const handleDateClick = (dateInfo: DateClickArg) => {
-    setCurrentDay(dateInfo.dateStr);
-  };
-
   const theme = useTheme();
 
   const backgroundEvent = {
@@ -85,7 +83,7 @@ const Calender = ({
       events={[...CalenderEvents, backgroundEvent]}
       eventContent={renderEventContent}
       datesSet={handleDateSet}
-      dateClick={handleDateClick}
+      dateClick={onDateClick}
     />
   );
 };

@@ -11,6 +11,9 @@ interface ReportProps {
   setCurrentMonth: React.Dispatch<React.SetStateAction<Date>>;
   monthlyTransactions: Transaction[];
   isLocading: boolean;
+  onDeleteTransaction: (
+    transactionId: string | readonly string[]
+  ) => Promise<void>;
 }
 
 const Report = ({
@@ -18,6 +21,7 @@ const Report = ({
   setCurrentMonth,
   monthlyTransactions,
   isLocading,
+  onDeleteTransaction,
 }: ReportProps) => {
   const commonPaperStyle = {
     height: "400px",
@@ -50,7 +54,10 @@ const Report = ({
         </Paper>
       </Grid>
       <Grid size={{ xs: 12 }}>
-        <TransactionTable monthlyTransactions={monthlyTransactions} />
+        <TransactionTable
+          monthlyTransactions={monthlyTransactions}
+          onDeleteTransaction={onDeleteTransaction}
+        />
       </Grid>
     </Grid>
   );

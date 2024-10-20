@@ -122,7 +122,7 @@ const CategoryChart = ({
         onChange={handleChange}
         slotProps={{
           inputLabel: { htmlFor: "transaction-type" },
-          htmlInput: { id: "transaction-type" },
+          input: { id: "transaction-type" },
         }}
       >
         <MenuItem value={"income"}>収入</MenuItem>

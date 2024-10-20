@@ -6,15 +6,17 @@ import Grid from "@mui/material/Grid2";
 
 interface DailySummaryProps {
   dailyTransactions: Transaction[];
+  columns: number;
 }
 
-const DailySummary = ({ dailyTransactions }: DailySummaryProps) => {
+const DailySummary = ({ dailyTransactions, columns }: DailySummaryProps) => {
   const { income, expense, balance } = financeCalculations(dailyTransactions);
+  const isThreeColumnsLayout = columns === 3;
   return (
     <Box>
       <Grid container spacing={2}>
         {/* 収入 */}
-        <Grid size={{ xs: 6 }} display={"flex"}>
+        <Grid size={{ xs: isThreeColumnsLayout ? 4 : 6 }} display={"flex"}>
           <Card
             sx={{ bgcolor: (theme) => theme.palette.grey[100], flexGrow: 1 }}
           >
@@ -36,7 +38,7 @@ const DailySummary = ({ dailyTransactions }: DailySummaryProps) => {
           </Card>
         </Grid>
         {/* 支出 */}
-        <Grid size={{ xs: 6 }} display={"flex"}>
+        <Grid size={{ xs: isThreeColumnsLayout ? 4 : 6 }} display={"flex"}>
           <Card
             sx={{ bgcolor: (theme) => theme.palette.grey[100], flexGrow: 1 }}
           >
@@ -58,7 +60,7 @@ const DailySummary = ({ dailyTransactions }: DailySummaryProps) => {
           </Card>
         </Grid>
         {/* 残高 */}
-        <Grid size={{ xs: 12 }} display={"flex"}>
+        <Grid size={{ xs: isThreeColumnsLayout ? 4 : 12 }} display={"flex"}>
           <Card
             sx={{ bgcolor: (theme) => theme.palette.grey[100], flexGrow: 1 }}
           >

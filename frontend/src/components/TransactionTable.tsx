@@ -48,10 +48,6 @@ function FinancialItem({ title, value, color }: FinancialItemProps) {
   );
 }
 
-interface TransactionTableProps {
-  monthlyTransactions: Transaction[];
-}
-
 interface TransactionTableHeadProps {
   numSelected: number;
   onSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -87,9 +83,10 @@ function TransactionTableHead(props: TransactionTableHeadProps) {
 }
 interface TransactionTableToolbarProps {
   numSelected: number;
+  onDelete: () => void;
 }
 function TransactionTableToolbar(props: TransactionTableToolbarProps) {
-  const { numSelected } = props;
+  const { numSelected, onDelete } = props;
   return (
     <Toolbar
       sx={[
@@ -127,7 +124,7 @@ function TransactionTableToolbar(props: TransactionTableToolbarProps) {
       )}
       {numSelected > 0 && (
         <Tooltip title="Delete">
-          <IconButton>
+          <IconButton onClick={onDelete}>
             <DeleteIcon />
           </IconButton>
         </Tooltip>
@@ -135,13 +132,19 @@ function TransactionTableToolbar(props: TransactionTableToolbarProps) {
     </Toolbar>
   );
 }
+
+interface TransactionTableProps {
+  monthlyTransactions: Transaction[];
+  onDeleteTransaction: (
+    transactionId: string | readonly string[]
+  ) => Promise<void>;
+}
 export default function TransactionTable({
   monthlyTransactions,
+  onDeleteTransaction,
 }: TransactionTableProps) {
   const theme = useTheme();
-  const [selected, setSelected] = React.useState<readonly (number | string)[]>(
-    []
-  );
+  const [selected, setSelected] = React.useState<readonly string[]>([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
@@ -154,12 +157,9 @@ export default function TransactionTable({
     setSelected([]);
   };
 
-  const handleClick = (
-    event: React.MouseEvent<unknown>,
-    id: number | string
-  ) => {
+  const handleClick = (event: React.MouseEvent<unknown>, id: string) => {
     const selectedIndex = selected.indexOf(id);
-    let newSelected: readonly (number | string)[] = [];
+    let newSelected: readonly string[] = [];
 
     if (selectedIndex === -1) {
       newSelected = newSelected.concat(selected, id);
@@ -185,6 +185,11 @@ export default function TransactionTable({
   ) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
+  };
+
+  const handleDelete = () => {
+    onDeleteTransaction(selected);
+    setSelected([]);
   };
 
   // Avoid a layout jump when reaching the last page with empty rows.
@@ -226,7 +231,10 @@ export default function TransactionTable({
           />
         </Grid>
 
-        <TransactionTableToolbar numSelected={selected.length} />
+        <TransactionTableToolbar
+          numSelected={selected.length}
+          onDelete={handleDelete}
+        />
         <TableContainer>
           <Table
             sx={{ minWidth: 750 }}
