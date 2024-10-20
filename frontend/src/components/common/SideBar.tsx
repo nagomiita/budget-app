@@ -4,10 +4,10 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
+import SignalCellularAltIcon from "@mui/icons-material/SignalCellularAlt";
 import { Box, Drawer } from "@mui/material";
 import Toolbar from "@mui/material/Toolbar";
 import HomeIcon from "@mui/icons-material/Home";
-import AnalyticsIcon from "@mui/icons-material/Analytics";
 import { NavLink } from "react-router-dom";
 import { CSSProperties } from "react";
 
@@ -32,7 +32,7 @@ const SideBar = ({
 }: SideBarProps) => {
   const MenuItems: menuItem[] = [
     { text: "Home", path: "/", icon: HomeIcon },
-    { text: "Report", path: "/report", icon: AnalyticsIcon },
+    { text: "月間レポート", path: "/report", icon: SignalCellularAltIcon },
   ];
 
   const baseLinkStyle: CSSProperties = {
