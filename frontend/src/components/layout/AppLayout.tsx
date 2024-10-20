@@ -33,7 +33,7 @@ export default function AppLayout() {
   return (
     <Box
       sx={{
-        display: "flex",
+        display: { md: "flex" },
         bgColor: (theme) => theme.palette.grey[100],
         minHeight: "100vh",
       }}
