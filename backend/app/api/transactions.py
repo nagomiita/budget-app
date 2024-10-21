@@ -3,7 +3,7 @@ from typing import List
 
 from core.database import get_db
 from fastapi import APIRouter, Depends, HTTPException
-from schemas.transaction import Transaction, TransactionCreate
+from schemas.transaction import Transaction, TransactionCreate, TransactionResponse
 from services.transaction import create_transaction, get_transactions
 from sqlalchemy.exc import SQLAlchemyError  # SQLAlchemyエラーのインポート
 from sqlalchemy.orm import Session
@@ -22,10 +22,16 @@ def read_transactions(db: Session = Depends(get_db)):
     return get_transactions(db)
 
 
-@router.post("/transactions", operation_id="post_transaction")
+@router.post(
+    "/transactions", response_model=TransactionResponse, operation_id="post_transaction"
+)
 def add_transaction(transaction: TransactionCreate, db: Session = Depends(get_db)):
     try:
-        return create_transaction(db, transaction)  # 取引を作成
+        # 取引を作成し、DBに保存
+        db_transaction = create_transaction(db, transaction)
+
+        # IDをstr型で返す
+        return TransactionResponse(id=str(db_transaction.id))  # IDを文字列として返す
 
     except SQLAlchemyError as e:  # SQLAlchemyのエラーを捕捉
         logger.error(

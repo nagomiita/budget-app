@@ -4,8 +4,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Tuple
 
+from category import COMPANY, MITSUI_SUMITOMO_CARD, RAKUTEN_CARD
 from schemas import Transaction
-from utils import setup_logger
+from utils import convert_string, setup_logger
 
 logger = setup_logger()
 
@@ -81,19 +82,38 @@ class JapanPost(CsvFile):
 
     def _process_row(self, row):
         transaction_date = datetime.strptime(row[0], "%Y%m%d").date().isoformat()
+        if row[5] in [
+            RAKUTEN_CARD,
+            MITSUI_SUMITOMO_CARD,
+        ]:  # クレジットカードの引き落としは除外
+            return None
+
         if row[2]:
-            t_type = "income"
-            amount = row[2]
-            category = "その他"
+            if row[5] == COMPANY:
+                t_type = "income"
+                amount = row[2]
+                category = "給与"
+                payee = row[4]
+            else:
+                t_type = "income"
+                amount = row[2]
+                category = "お小遣い"
+                payee = row[5]
         else:
-            t_type = "expense"
-            amount = row[3]
-            category = "給与"
-        payee = row[5]
+            if row[4] == "カード":  # カード引き出し
+                t_type = "expense"
+                amount = row[3]
+                category = "その他"
+                payee = "現金引き出し"
+            else:
+                t_type = "expense"
+                amount = row[3]
+                category = "その他"
+                payee = row[5]
         return Transaction(
             date=transaction_date,
             amount=amount,
-            content=payee,
+            content=convert_string(payee),
             type=t_type,
             category=category,
             source="japan_post",
@@ -120,7 +140,7 @@ class Rakuten(CsvFile):
         return Transaction(
             date=transaction_date,
             amount=amount,
-            content=payee,
+            content=convert_string(payee),
             type="expense",
             category="その他",
             source="rakuten",
@@ -156,7 +176,7 @@ class MitsuiSumitomo(CsvFile):
         return Transaction(
             date=transaction_date,
             amount=amount,
-            content=payee,
+            content=convert_string(payee),
             type="expense",
             category="その他",
             source="mitsui_sumitomo",

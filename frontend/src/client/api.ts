@@ -166,6 +166,19 @@ export type TransactionCreateTypeEnum = typeof TransactionCreateTypeEnum[keyof t
 /**
  * 
  * @export
+ * @interface TransactionResponse
+ */
+export interface TransactionResponse {
+    /**
+     * 
+     * @type {string}
+     * @memberof TransactionResponse
+     */
+    'id': string;
+}
+/**
+ * 
+ * @export
  * @interface ValidationError
  */
 export interface ValidationError {
@@ -297,7 +310,7 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async postTransaction(transactionCreate: TransactionCreate, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+        async postTransaction(transactionCreate: TransactionCreate, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TransactionResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.postTransaction(transactionCreate, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['DefaultApi.postTransaction']?.[localVarOperationServerIndex]?.url;
@@ -329,7 +342,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        postTransaction(transactionCreate: TransactionCreate, options?: RawAxiosRequestConfig): AxiosPromise<any> {
+        postTransaction(transactionCreate: TransactionCreate, options?: RawAxiosRequestConfig): AxiosPromise<TransactionResponse> {
             return localVarFp.postTransaction(transactionCreate, options).then((request) => request(axios, basePath));
         },
     };

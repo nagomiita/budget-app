@@ -36,3 +36,7 @@ class Transaction(TransactionBase):
 
     class Config:
         orm_mode = True
+
+
+class TransactionResponse(BaseModel):
+    id: str  # 返り値のIDをstr型で定義

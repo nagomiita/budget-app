@@ -13,23 +13,30 @@ import { collection, getDocs } from "firebase/firestore";
 import { Transaction } from "@/types";
 import { db } from "@/firebase";
 import { isFireStoreError } from "@/utils/errorHandling";
+import { DefaultApi } from "@/client";
+import { config } from "@/utils/apiClient";
 
 const drawerWidth = 240;
 
 export default function AppLayout() {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [isClosing, setIsClosing] = React.useState(false);
+  const apiInstance = new DefaultApi(config);
 
   const { setTransactions, setIsLoading } = useAppContext();
   React.useEffect(() => {
-    const fetcheTransactions = async () => {
+    const fetchTransactions = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, "Transactions"));
-        const transactionsData = querySnapshot.docs.map((doc) => {
+        const querySnapshot = await apiInstance.getTransactions();
+        const transactionsData = querySnapshot.data.map((doc) => {
           return {
-            ...doc.data(),
-            id: doc.id,
-          } as Transaction;
+            id: String(doc.id), // 各トランザクションのIDを設定
+            date: doc.date, // 各トランザクションの日付を設定
+            amount: doc.amount, // 各トランザクションの金額を設定
+            content: doc.content, // 各トランザクションの内容を設定
+            type: doc.type, // 各トランザクションのタイプを設定
+            category: doc.category, // 各トランザクションのカテゴリを設定
+          } as Transaction; // Transaction型にキャスト
         });
         setTransactions(transactionsData);
       } catch (err) {
@@ -42,7 +49,7 @@ export default function AppLayout() {
         setIsLoading(false);
       }
     };
-    fetcheTransactions();
+    fetchTransactions();
   }, []);
 
   const handleDrawerClose = () => {

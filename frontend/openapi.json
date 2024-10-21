@@ -35,7 +35,11 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": { "application/json": { "schema": {} } }
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/TransactionResponse" }
+              }
+            }
           },
           "422": {
             "description": "Validation Error",
@@ -144,6 +148,12 @@
         "type": "object",
         "required": ["date", "amount", "content", "type", "category"],
         "title": "TransactionCreate"
+      },
+      "TransactionResponse": {
+        "properties": { "id": { "type": "string", "title": "Id" } },
+        "type": "object",
+        "required": ["id"],
+        "title": "TransactionResponse"
       },
       "ValidationError": {
         "properties": {

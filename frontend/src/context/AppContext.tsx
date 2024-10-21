@@ -11,6 +11,8 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { createContext, ReactNode, useContext, useState } from "react";
+import { DefaultApi } from "@/client";
+import { config } from "@/utils/apiClient";
 
 interface AppContextType {
   transactions: Transaction[];
@@ -38,14 +40,15 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
   const [isLocading, setIsLoading] = useState(true);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("lg"));
+  const apiInstance = new DefaultApi(config);
 
   const onSaveTransaction = async (transaction: Schema) => {
     try {
-      const docRef = await addDoc(collection(db, "Transactions"), transaction);
-      console.log("Document written with ID: ", docRef.id);
+      const docRef = await apiInstance.postTransaction(transaction);
+      console.log("Document written with ID: ", docRef.data.id);
 
       const newTransaction = {
-        id: docRef.id,
+        id: docRef.data.id,
         ...transaction,
       } as Transaction;
       setTransactions((prevTransactions) => [
