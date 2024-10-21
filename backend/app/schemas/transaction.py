@@ -39,4 +39,4 @@ class Transaction(TransactionBase):
 
 
 class TransactionResponse(BaseModel):
-    id: str  # 返り値のIDをstr型で定義
+    id: int

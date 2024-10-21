@@ -1,11 +1,6 @@
 import { useAppContext } from "@/context/AppContext";
 import usemonthlyTransactions from "@/hooks/usemonthlyTransactions";
-import {
-  ExpenseCategory,
-  IncomeCategory,
-  Transaction,
-  TransactionType,
-} from "@/types";
+import { ExpenseCategory, IncomeCategory, TransactionType } from "@/types";
 import {
   Box,
   CircularProgress,

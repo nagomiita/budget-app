@@ -45,3 +45,23 @@ def create_transaction(db: Session, transaction: TransactionCreate):
             f"An unexpected error occurred: {e}"
         )  # エラーメッセージをログに記録
         raise  # エラーを再スロー
+
+
+def get_transaction_by_id(db: Session, transaction_id: int):
+    return db.query(Transaction).filter(Transaction.id == transaction_id).first()
+
+
+def update_transaction(db: Session, transaction, updated_data: TransactionCreate):
+    transaction.date = updated_data.date
+    transaction.amount = updated_data.amount
+    transaction.content = updated_data.content
+    transaction.type = updated_data.type
+    transaction.category = updated_data.category
+    db.commit()
+    db.refresh(transaction)
+    return transaction
+
+
+def delete_transaction(db: Session, transaction):
+    db.delete(transaction)
+    db.commit()

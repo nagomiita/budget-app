@@ -1,6 +1,5 @@
 import { useAppContext } from "@/context/AppContext";
 import usemonthlyTransactions from "@/hooks/usemonthlyTransactions";
-import { Transaction } from "@/types";
 import { calculateDailyBalances } from "@/utils/financeCalculations";
 import { Box, Typography, useTheme } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";

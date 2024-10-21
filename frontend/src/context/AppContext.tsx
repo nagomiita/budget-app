@@ -1,15 +1,7 @@
-import { db } from "@/firebase";
 import { Transaction } from "@/types";
 import { isFireStoreError } from "@/utils/errorHandling";
 import { Schema } from "@/validations/schema";
 import { useMediaQuery, useTheme } from "@mui/material";
-import {
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  updateDoc,
-} from "firebase/firestore";
 import { createContext, ReactNode, useContext, useState } from "react";
 import { DefaultApi } from "@/client";
 import { config } from "@/utils/apiClient";
@@ -48,7 +40,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
       console.log("Document written with ID: ", docRef.data.id);
 
       const newTransaction = {
-        id: docRef.data.id,
+        id: String(docRef.data.id),
         ...transaction,
       } as Transaction;
       setTransactions((prevTransactions) => [
@@ -72,7 +64,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
         ? transactionIds
         : [transactionIds];
       for (const id of idsToDelete) {
-        await deleteDoc(doc(db, "Transactions", id));
+        await apiInstance.deleteTransaction(id);
       }
       const filteredTransactions = transactions.filter(
         (transaction) => !idsToDelete.includes(transaction.id)
@@ -92,8 +84,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
     transactionId: string
   ) => {
     try {
-      const docRef = doc(db, "Transactions", transactionId);
-      await updateDoc(docRef, transaction);
+      await apiInstance.updateTransaction(Number(transactionId), transaction);
       const updatedTramsactions = transactions.map((t) =>
         t.id === transactionId ? { ...t, ...transaction } : t
       ) as Transaction[];

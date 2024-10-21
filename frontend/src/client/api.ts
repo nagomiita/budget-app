@@ -171,10 +171,10 @@ export type TransactionCreateTypeEnum = typeof TransactionCreateTypeEnum[keyof t
 export interface TransactionResponse {
     /**
      * 
-     * @type {string}
+     * @type {number}
      * @memberof TransactionResponse
      */
-    'id': string;
+    'id': number;
 }
 /**
  * 
@@ -215,6 +215,40 @@ export interface ValidationErrorLocInner {
  */
 export const DefaultApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
+        /**
+         * 
+         * @summary Delete Transaction Endpoint
+         * @param {number} transactionId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteTransaction: async (transactionId: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'transactionId' is not null or undefined
+            assertParamExists('deleteTransaction', 'transactionId', transactionId)
+            const localVarPath = `/api/transactions/{transaction_id}`
+                .replace(`{${"transaction_id"}}`, encodeURIComponent(String(transactionId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
         /**
          * 
          * @summary Read Transactions
@@ -281,6 +315,46 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * 
+         * @summary Update Transaction Endpoint
+         * @param {number} transactionId 
+         * @param {TransactionCreate} transactionCreate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateTransaction: async (transactionId: number, transactionCreate: TransactionCreate, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'transactionId' is not null or undefined
+            assertParamExists('updateTransaction', 'transactionId', transactionId)
+            // verify required parameter 'transactionCreate' is not null or undefined
+            assertParamExists('updateTransaction', 'transactionCreate', transactionCreate)
+            const localVarPath = `/api/transactions/{transaction_id}`
+                .replace(`{${"transaction_id"}}`, encodeURIComponent(String(transactionId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(transactionCreate, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -291,6 +365,19 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
 export const DefaultApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = DefaultApiAxiosParamCreator(configuration)
     return {
+        /**
+         * 
+         * @summary Delete Transaction Endpoint
+         * @param {number} transactionId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteTransaction(transactionId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteTransaction(transactionId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['DefaultApi.deleteTransaction']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
         /**
          * 
          * @summary Read Transactions
@@ -316,6 +403,20 @@ export const DefaultApiFp = function(configuration?: Configuration) {
             const localVarOperationServerBasePath = operationServerMap['DefaultApi.postTransaction']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
+        /**
+         * 
+         * @summary Update Transaction Endpoint
+         * @param {number} transactionId 
+         * @param {TransactionCreate} transactionCreate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updateTransaction(transactionId: number, transactionCreate: TransactionCreate, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Transaction>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateTransaction(transactionId, transactionCreate, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['DefaultApi.updateTransaction']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
     }
 };
 
@@ -326,6 +427,16 @@ export const DefaultApiFp = function(configuration?: Configuration) {
 export const DefaultApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = DefaultApiFp(configuration)
     return {
+        /**
+         * 
+         * @summary Delete Transaction Endpoint
+         * @param {number} transactionId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteTransaction(transactionId: number, options?: RawAxiosRequestConfig): AxiosPromise<any> {
+            return localVarFp.deleteTransaction(transactionId, options).then((request) => request(axios, basePath));
+        },
         /**
          * 
          * @summary Read Transactions
@@ -345,6 +456,17 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
         postTransaction(transactionCreate: TransactionCreate, options?: RawAxiosRequestConfig): AxiosPromise<TransactionResponse> {
             return localVarFp.postTransaction(transactionCreate, options).then((request) => request(axios, basePath));
         },
+        /**
+         * 
+         * @summary Update Transaction Endpoint
+         * @param {number} transactionId 
+         * @param {TransactionCreate} transactionCreate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateTransaction(transactionId: number, transactionCreate: TransactionCreate, options?: RawAxiosRequestConfig): AxiosPromise<Transaction> {
+            return localVarFp.updateTransaction(transactionId, transactionCreate, options).then((request) => request(axios, basePath));
+        },
     };
 };
 
@@ -355,6 +477,18 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
  * @extends {BaseAPI}
  */
 export class DefaultApi extends BaseAPI {
+    /**
+     * 
+     * @summary Delete Transaction Endpoint
+     * @param {number} transactionId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public deleteTransaction(transactionId: number, options?: RawAxiosRequestConfig) {
+        return DefaultApiFp(this.configuration).deleteTransaction(transactionId, options).then((request) => request(this.axios, this.basePath));
+    }
+
     /**
      * 
      * @summary Read Transactions
@@ -376,6 +510,19 @@ export class DefaultApi extends BaseAPI {
      */
     public postTransaction(transactionCreate: TransactionCreate, options?: RawAxiosRequestConfig) {
         return DefaultApiFp(this.configuration).postTransaction(transactionCreate, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Update Transaction Endpoint
+     * @param {number} transactionId 
+     * @param {TransactionCreate} transactionCreate 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public updateTransaction(transactionId: number, transactionCreate: TransactionCreate, options?: RawAxiosRequestConfig) {
+        return DefaultApiFp(this.configuration).updateTransaction(transactionId, transactionCreate, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
