@@ -1,18 +1,12 @@
+import { useAppContext } from "@/context/AppContext";
 import { Box, Button } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 import { addMonths } from "date-fns";
 import { ja } from "date-fns/locale";
 
-interface MonthSelectorProps {
-  currentMonth: Date;
-  setCurrentMonth: React.Dispatch<React.SetStateAction<Date>>;
-}
-
-const MonthSelector = ({
-  currentMonth,
-  setCurrentMonth,
-}: MonthSelectorProps) => {
+const MonthSelector = () => {
+  const { currentMonth, setCurrentMonth } = useAppContext();
   const handlePreviousMonth = () => {
     const previousMonth = addMonths(currentMonth, -1);
     setCurrentMonth(previousMonth);

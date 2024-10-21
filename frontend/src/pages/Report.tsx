@@ -2,27 +2,10 @@ import BarChart from "@/components/BarChart";
 import CategoryChart from "@/components/CategoryChart";
 import MonthSelector from "@/components/MonthSelector";
 import TransactionTable from "@/components/TransactionTable";
-import { Transaction } from "@/types";
 import { Paper } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 
-interface ReportProps {
-  currentMonth: Date;
-  setCurrentMonth: React.Dispatch<React.SetStateAction<Date>>;
-  monthlyTransactions: Transaction[];
-  isLocading: boolean;
-  onDeleteTransaction: (
-    transactionId: string | readonly string[]
-  ) => Promise<void>;
-}
-
-const Report = ({
-  currentMonth,
-  setCurrentMonth,
-  monthlyTransactions,
-  isLocading,
-  onDeleteTransaction,
-}: ReportProps) => {
+const Report = () => {
   const commonPaperStyle = {
     height: "400px",
     display: "flex",
@@ -32,32 +15,20 @@ const Report = ({
   return (
     <Grid container spacing={2}>
       <Grid size={{ xs: 12 }}>
-        <MonthSelector
-          currentMonth={currentMonth}
-          setCurrentMonth={setCurrentMonth}
-        />
+        <MonthSelector />
       </Grid>
       <Grid size={{ xs: 12, md: 4 }}>
         <Paper sx={commonPaperStyle}>
-          <CategoryChart
-            monthlyTransactions={monthlyTransactions}
-            isLocading={isLocading}
-          />
+          <CategoryChart />
         </Paper>
       </Grid>
       <Grid size={{ xs: 12, md: 8 }}>
         <Paper sx={commonPaperStyle}>
-          <BarChart
-            monthlyTransactions={monthlyTransactions}
-            isLocading={isLocading}
-          />
+          <BarChart />
         </Paper>
       </Grid>
       <Grid size={{ xs: 12 }}>
-        <TransactionTable
-          monthlyTransactions={monthlyTransactions}
-          onDeleteTransaction={onDeleteTransaction}
-        />
+        <TransactionTable />
       </Grid>
     </Grid>
   );

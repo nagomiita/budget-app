@@ -3,15 +3,15 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import "@/calendar.css";
 import { DatesSetArg, EventContentArg } from "@fullcalendar/core/index.js";
 import { calculateDailyBalances } from "@/utils/financeCalculations";
-import { Balance, CalenderContent, Transaction } from "@/types";
+import { Balance, CalenderContent } from "@/types";
 import { formatCurrency } from "@/utils/formatting";
 import interactionPlugin, { DateClickArg } from "@fullcalendar/interaction";
 import { useTheme } from "@mui/material";
 import { isSameMonth } from "date-fns";
+import usemonthlyTransactions from "@/hooks/usemonthlyTransactions";
+import { useAppContext } from "@/context/AppContext";
 
 interface CalenderProps {
-  monthlyTransactions: Transaction[];
-  setCurrentMonth: React.Dispatch<React.SetStateAction<Date>>;
   setCurrentDay: React.Dispatch<React.SetStateAction<string>>;
   currentDay: string;
   today: string;
@@ -19,8 +19,6 @@ interface CalenderProps {
 }
 
 const Calender = ({
-  monthlyTransactions,
-  setCurrentMonth,
   setCurrentDay,
   currentDay,
   today,
@@ -41,6 +39,7 @@ const Calender = ({
       </div>
     );
   };
+  const monthlyTransactions = usemonthlyTransactions();
   const dailyBalances = calculateDailyBalances(monthlyTransactions);
   const createCalenderEvents = (
     dailyBalances: Record<string, Balance>
@@ -57,6 +56,8 @@ const Calender = ({
   };
 
   const CalenderEvents = createCalenderEvents(dailyBalances);
+
+  const { setCurrentMonth } = useAppContext();
 
   const handleDateSet = (datesetInfo: DatesSetArg) => {
     const currentMonth = datesetInfo.view.currentStart;

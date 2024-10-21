@@ -1,3 +1,5 @@
+import { useAppContext } from "@/context/AppContext";
+import usemonthlyTransactions from "@/hooks/usemonthlyTransactions";
 import {
   ExpenseCategory,
   IncomeCategory,
@@ -22,18 +24,12 @@ import {
 import { useState } from "react";
 import { Pie } from "react-chartjs-2";
 
-interface CategoryChartProps {
-  monthlyTransactions: Transaction[];
-  isLocading: boolean;
-}
-
 ChartJS.register(ArcElement, Tooltip, Legend);
-const CategoryChart = ({
-  monthlyTransactions,
-  isLocading,
-}: CategoryChartProps) => {
+const CategoryChart = () => {
   const theme = useTheme();
   const [selectedType, setSelectedType] = useState<TransactionType>("expense");
+  const monthlyTransactions = usemonthlyTransactions();
+  const { isLocading } = useAppContext();
 
   const options = {
     maintainAspectRatio: false,

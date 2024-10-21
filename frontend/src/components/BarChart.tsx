@@ -1,3 +1,5 @@
+import { useAppContext } from "@/context/AppContext";
+import usemonthlyTransactions from "@/hooks/usemonthlyTransactions";
 import { Transaction } from "@/types";
 import { calculateDailyBalances } from "@/utils/financeCalculations";
 import { Box, Typography, useTheme } from "@mui/material";
@@ -14,11 +16,6 @@ import {
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
 
-interface BarChartProps {
-  monthlyTransactions: Transaction[];
-  isLocading: boolean;
-}
-
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -28,7 +25,7 @@ ChartJS.register(
   Legend
 );
 
-const BarChart = ({ monthlyTransactions, isLocading }: BarChartProps) => {
+const BarChart = () => {
   const theme = useTheme();
   const options = {
     maintainAspectRatio: false,
@@ -40,13 +37,12 @@ const BarChart = ({ monthlyTransactions, isLocading }: BarChartProps) => {
       },
     },
   };
-
+  const monthlyTransactions = usemonthlyTransactions();
   const dailyBalances = calculateDailyBalances(monthlyTransactions);
-
   const dateLabels = Object.keys(dailyBalances).sort();
-
   const expenseData = dateLabels.map((day) => dailyBalances[day].expense);
   const incomeData = dateLabels.map((day) => dailyBalances[day].income);
+  const { isLocading } = useAppContext();
 
   const data: ChartData<"bar"> = {
     labels: dateLabels,

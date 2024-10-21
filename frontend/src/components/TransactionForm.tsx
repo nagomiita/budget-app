@@ -27,24 +27,16 @@ import { useEffect, useState } from "react";
 import { ExpenseCategory, IncomeCategory, Transaction } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Schema, transactionSchema } from "@/validations/schema";
+import { useAppContext } from "@/context/AppContext";
 
 interface TransactionFormProps {
   onCloseForm: () => void;
   isEntryDrawerOpen: boolean;
   currentDay: string;
-  onSaveTransaction: (transaction: Schema) => Promise<void>;
   selectedTransaction: Transaction | null;
   setSelectedTransaction: React.Dispatch<
     React.SetStateAction<Transaction | null>
   >;
-  onDeleteTransaction: (
-    transactionId: string | readonly string[]
-  ) => Promise<void>;
-  onUpdateTransaction: (
-    transaction: Schema,
-    transactionId: string
-  ) => Promise<void>;
-  isMobile: boolean;
   isDialogOpen: boolean;
   setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -59,16 +51,19 @@ const TransactionForm = ({
   onCloseForm,
   isEntryDrawerOpen,
   currentDay,
-  onSaveTransaction,
   selectedTransaction,
   setSelectedTransaction,
-  onDeleteTransaction,
-  onUpdateTransaction,
-  isMobile,
+
   isDialogOpen,
   setIsDialogOpen,
 }: TransactionFormProps) => {
   const formWidth = 320;
+  const {
+    isMobile,
+    onDeleteTransaction,
+    onSaveTransaction,
+    onUpdateTransaction,
+  } = useAppContext();
 
   const expenseCategories: CategoryItem[] = [
     { label: "食費", icon: <FastfoodIcon fontSize="small" /> },
