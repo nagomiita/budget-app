@@ -1,13 +1,11 @@
 from fastapi import FastAPI
+from api import transactions
+from core.database import engine, Base
+
+# データベーステーブルの作成
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
-
-
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: str = None):
-    return {"item_id": item_id, "q": q}
+# ルーティング
+app.include_router(transactions.router, prefix="/api")

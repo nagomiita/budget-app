@@ -1,0 +1,19 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - 8000:8000
+    volumes:
+      - ./backend/app:/app
+    # env_file:
+    #   - .env
+
+    # frontend:
+    #   image: '${DOCKER_IMAGE_FRONTEND?Variable not set}:${TAG-latest}'
+    #   restart: always
+    #   build:
+    #     context: ./frontend
+    #     args:
+    #       - VITE_API_URL=https://api.${DOMAIN?Variable not set}
+    #       - NODE_ENV=production
