@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "generate-client": "curl -o openapi.json http://127.0.0.1:8000/openapi.json && docker run --rm -v \"${PWD}:/local\" openapitools/openapi-generator-cli generate -i /local/openapi.json -g typescript-axios -o /local/src/client"
   },
   "dependencies": {
     "@emotion/react": "^11.13.3",
@@ -20,6 +21,7 @@
     "@mui/icons-material": "^6.1.4",
     "@mui/material": "^6.1.4",
     "@mui/x-date-pickers": "^7.21.0",
+    "axios": "^1.7.7",
     "chart.js": "^4.4.5",
     "date-fns": "^4.1.0",
     "firebase": "^10.14.1",

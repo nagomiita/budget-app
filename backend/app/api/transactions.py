@@ -15,12 +15,14 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.get("/transactions", response_model=List[Transaction])
+@router.get(
+    "/transactions", response_model=List[Transaction], operation_id="get_transactions"
+)
 def read_transactions(db: Session = Depends(get_db)):
     return get_transactions(db)
 
 
-@router.post("/transactions")
+@router.post("/transactions", operation_id="post_transaction")
 def add_transaction(transaction: TransactionCreate, db: Session = Depends(get_db)):
     try:
         return create_transaction(db, transaction)  # 取引を作成

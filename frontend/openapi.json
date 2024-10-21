@@ -1,0 +1,164 @@
+{
+  "openapi": "3.1.0",
+  "info": { "title": "FastAPI", "version": "0.1.0" },
+  "paths": {
+    "/api/transactions": {
+      "get": {
+        "summary": "Read Transactions",
+        "operationId": "get_transactions",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": { "$ref": "#/components/schemas/Transaction" },
+                  "type": "array",
+                  "title": "Response Get Transactions"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add Transaction",
+        "operationId": "post_transaction",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/TransactionCreate" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": { "$ref": "#/components/schemas/ValidationError" },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Transaction": {
+        "properties": {
+          "date": { "type": "string", "format": "date", "title": "Date" },
+          "amount": { "type": "integer", "title": "Amount" },
+          "content": { "type": "string", "title": "Content" },
+          "type": {
+            "type": "string",
+            "enum": ["income", "expense"],
+            "title": "Type"
+          },
+          "category": {
+            "anyOf": [
+              { "type": "string", "enum": ["給与", "副収入", "お小遣い"] },
+              {
+                "type": "string",
+                "enum": [
+                  "食費",
+                  "日用品",
+                  "住居費",
+                  "交際費",
+                  "娯楽",
+                  "交通費",
+                  "その他"
+                ]
+              }
+            ],
+            "title": "Category"
+          },
+          "source": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Source"
+          },
+          "transaction_type": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Transaction Type"
+          },
+          "id": { "type": "integer", "title": "Id" }
+        },
+        "type": "object",
+        "required": ["date", "amount", "content", "type", "category", "id"],
+        "title": "Transaction"
+      },
+      "TransactionCreate": {
+        "properties": {
+          "date": { "type": "string", "format": "date", "title": "Date" },
+          "amount": { "type": "integer", "title": "Amount" },
+          "content": { "type": "string", "title": "Content" },
+          "type": {
+            "type": "string",
+            "enum": ["income", "expense"],
+            "title": "Type"
+          },
+          "category": {
+            "anyOf": [
+              { "type": "string", "enum": ["給与", "副収入", "お小遣い"] },
+              {
+                "type": "string",
+                "enum": [
+                  "食費",
+                  "日用品",
+                  "住居費",
+                  "交際費",
+                  "娯楽",
+                  "交通費",
+                  "その他"
+                ]
+              }
+            ],
+            "title": "Category"
+          },
+          "source": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Source"
+          },
+          "transaction_type": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Transaction Type"
+          }
+        },
+        "type": "object",
+        "required": ["date", "amount", "content", "type", "category"],
+        "title": "TransactionCreate"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": { "anyOf": [{ "type": "string" }, { "type": "integer" }] },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": { "type": "string", "title": "Message" },
+          "type": { "type": "string", "title": "Error Type" }
+        },
+        "type": "object",
+        "required": ["loc", "msg", "type"],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
