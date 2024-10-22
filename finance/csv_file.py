@@ -98,7 +98,7 @@ class JapanPost(CsvFile):
                 t_type = "income"
                 amount = row[2]
                 category = "お小遣い"
-                payee = row[5]
+                payee = row[5] or row[4]
         else:
             if row[4] == "カード":  # カード引き出し
                 t_type = "expense"
@@ -109,7 +109,7 @@ class JapanPost(CsvFile):
                 t_type = "expense"
                 amount = row[3]
                 category = "その他"
-                payee = row[5]
+                payee = row[5] or row[4]
         return Transaction(
             date=transaction_date,
             amount=amount,

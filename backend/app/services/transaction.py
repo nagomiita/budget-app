@@ -23,6 +23,8 @@ def create_transaction(db: Session, transaction: TransactionCreate):
             content=transaction.content,
             type=transaction.type,
             category=transaction.category,
+            source=transaction.source,
+            transaction_type=transaction.transaction_type,
         )
 
         # データベースに追加
