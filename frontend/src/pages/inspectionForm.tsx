@@ -1,7 +1,19 @@
-import React, { useState, useEffect } from "react";
-import { TextField, Button, Box, Typography, Grid } from "@mui/material";
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  TextField,
+  Button,
+  Box,
+  Typography,
+  Grid,
+  CircularProgress,
+  Snackbar,
+  Alert,
+} from "@mui/material";
 import { format } from "date-fns";
+import axios from "axios";
+import { evaluate } from "mathjs";
 
+// 型定義
 type FormValues = {
   productLot: string;
   inspector: string;
@@ -21,198 +33,178 @@ type CustomFormField = {
   isInspectionData?: boolean;
 };
 
-const customForm: CustomFormField[] = [
-  {
-    item: "productLot",
-    type: "text",
-    display_name: "製品ロット",
-    component_type: "input",
-  },
-  {
-    item: "inspector",
-    type: "text",
-    display_name: "検査者",
-    component_type: "input",
-  },
-  {
-    item: "inspectionDate",
-    type: "date",
-    display_name: "検査日",
-    component_type: "input",
-  },
-  {
-    item: "custom_field1",
-    type: "number",
-    display_name: "検査データ1",
-    component_type: "auto_post",
-    isInspectionData: true,
-  },
-  {
-    item: "custom_field2",
-    type: "number",
-    display_name: "検査データ2",
-    component_type: "auto_post",
-    isInspectionData: true,
-  },
-  {
-    item: "custom_field3",
-    type: "number",
-    display_name: "検査データ3", // 新しいフィールド
-    component_type: "auto_post",
-    isInspectionData: true,
-  },
-  {
-    item: "formula",
-    type: "text",
-    display_name: "計算式",
-    component_type: "calculate",
-    formula: "(custom_field1 + custom_field3) / 2", // 平均を取る計算式
-  },
-  {
-    item: "productLot",
-    type: "text",
-    display_name: "製品ロット",
-    component_type: "input",
-  },
-  {
-    item: "inspector",
-    type: "text",
-    display_name: "検査者",
-    component_type: "input",
-  },
-  {
-    item: "inspectionDate",
-    type: "date",
-    display_name: "検査日",
-    component_type: "input",
-  },
-  {
-    item: "custom_field1",
-    type: "number",
-    display_name: "検査データ1",
-    component_type: "auto_post",
-    isInspectionData: true,
-  },
-  {
-    item: "custom_field2",
-    type: "number",
-    display_name: "検査データ2",
-    component_type: "auto_post",
-    isInspectionData: true,
-  },
-  {
-    item: "formula",
-    type: "text",
-    display_name: "計算式",
-    component_type: "calculate",
-    formula: "custom_field1 * custom_field2",
-  },
-  // {
-  //   item: "inspectionFile",
-  //   type: "file",
-  //   display_name: "検査データファイル",
-  //   component_type: "file_input",
-  //   required: true,
-  // },
-];
-
+// Categoryコンポーネント
 const Category: React.FC = () => {
-  const [formRows, setFormRows] = useState<FormValues[]>([
-    {
-      productLot: "",
-      inspector: "",
-      inspectionDate: format(new Date(), "yyyy-MM-dd"),
-      custom_fields: {
-        custom_field1: 0,
-        custom_field2: 0,
-        formula: 0,
-      },
-    },
-  ]);
+  const [customForm, setCustomForm] = useState<CustomFormField[]>([]);
+  const [formRows, setFormRows] = useState<FormValues[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleRowChange = (
-    index: number,
-    field: keyof FormValues | string,
-    value: any
-  ) => {
-    setFormRows((prev) => {
-      const updatedRows = [...prev];
-      if (field.includes("custom_fields.")) {
-        const customField = field.split(".")[1];
-        updatedRows[index] = {
-          ...updatedRows[index],
-          custom_fields: {
-            ...updatedRows[index].custom_fields,
-            [customField]: value,
-          },
-        };
-      } else {
-        updatedRows[index] = { ...updatedRows[index], [field]: value };
+  // customFormをバックエンドから取得
+  useEffect(() => {
+    const fetchCustomForm = async () => {
+      try {
+        const response = await axios.get<CustomFormField[]>(
+          "http://localhost:8000/api/api/customForm"
+        ); // バックエンドのエンドポイントに合わせて修正
+        setCustomForm(response.data);
+        initializeFormRows(response.data);
+        setLoading(false);
+      } catch (err) {
+        console.error("customFormの取得中にエラーが発生しました:", err);
+        setError("フォームの初期化に失敗しました。再試行してください。");
+        setLoading(false);
       }
-      return updatedRows;
+    };
+
+    fetchCustomForm();
+  }, []);
+
+  // フォーム行の初期化
+  const initializeFormRows = (formFields: CustomFormField[]) => {
+    const initialCustomFields: { [key: string]: number } = {};
+
+    formFields.forEach((field) => {
+      if (
+        field.component_type === "auto_post" ||
+        field.component_type === "calculate"
+      ) {
+        initialCustomFields[field.item] = 0;
+      }
     });
+
+    setFormRows([
+      {
+        productLot: "",
+        inspector: "",
+        inspectionDate: format(new Date(), "yyyy-MM-dd"),
+        custom_fields: { ...initialCustomFields },
+      },
+    ]);
   };
 
-  const calculateFormula = (index: number) => {
-    const customFields = formRows[index].custom_fields;
-    const formula = customForm.find(
-      (field) => field.item === "formula"
-    )?.formula;
-
-    if (formula) {
-      // フィールド名に対応する変数を関数の引数として動的に生成
-      const fieldKeys = Object.keys(customFields);
-      const fieldValues = Object.values(customFields);
-
-      try {
-        // 計算式にフィールドの値を代入して評価
-        const result = Function(
-          ...fieldKeys,
-          `return ${formula}`
-        )(...fieldValues);
-        setFormRows((prev) => {
-          const updatedRows = [...prev];
+  // フィールド変更ハンドラー
+  const handleRowChange = useCallback(
+    (index: number, field: keyof FormValues | string, value: any) => {
+      setFormRows((prev) => {
+        const updatedRows = [...prev];
+        if (field.startsWith("custom_fields.")) {
+          const customField = field.split(".")[1];
           updatedRows[index] = {
             ...updatedRows[index],
             custom_fields: {
               ...updatedRows[index].custom_fields,
-              formula: result, // 計算結果をcustom_fieldsに保存
+              [customField]: value,
             },
           };
-          return updatedRows;
-        });
-      } catch (error) {
-        console.error("計算式の評価中にエラーが発生しました:", error);
+        } else {
+          updatedRows[index] = { ...updatedRows[index], [field]: value };
+        }
+        return updatedRows;
+      });
+    },
+    []
+  );
+
+  // 計算フィールドの計算
+  const calculateFormula = useCallback(
+    (index: number, formulaField: CustomFormField) => {
+      const customFields = formRows[index].custom_fields;
+      const formula = formulaField.formula;
+
+      if (formula) {
+        try {
+          const result = evaluate(formula, customFields);
+          setFormRows((prev) => {
+            const updatedRows = [...prev];
+            updatedRows[index] = {
+              ...updatedRows[index],
+              custom_fields: {
+                ...updatedRows[index].custom_fields,
+                [formulaField.item]: result,
+              },
+            };
+            return updatedRows;
+          });
+        } catch (err) {
+          console.error("計算式の評価中にエラーが発生しました:", err);
+          setError(
+            `計算式 "${formulaField.display_name}" の評価中にエラーが発生しました。`
+          );
+        }
       }
-    }
-  };
+    },
+    [formRows]
+  );
 
+  // 計算式の適用
   useEffect(() => {
-    formRows.forEach((_, index) => {
-      calculateFormula(index);
-    });
-  }, [formRows]);
+    if (customForm.length === 0) return;
 
+    customForm
+      .filter((field) => field.component_type === "calculate")
+      .forEach((formulaField) => {
+        formRows.forEach((_, index) => {
+          calculateFormula(index, formulaField);
+        });
+      });
+  }, [formRows, customForm, calculateFormula]);
+
+  // フォーム行の追加
   const addFormRow = () => {
+    const initialCustomFields: { [key: string]: number } = {};
+
+    customForm.forEach((field) => {
+      if (
+        field.component_type === "auto_post" ||
+        field.component_type === "calculate"
+      ) {
+        initialCustomFields[field.item] = 0;
+      }
+    });
+
     setFormRows((prev) => [
       ...prev,
       {
         productLot: "",
         inspector: "",
         inspectionDate: format(new Date(), "yyyy-MM-dd"),
-        custom_fields: {
-          custom_field1: 0,
-          custom_field2: 0,
-          formula: 0, // 初期値を設定
-        },
+        custom_fields: { ...initialCustomFields },
       },
     ]);
   };
 
+  // フォーム送信ハンドラー
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    console.log(JSON.stringify(formRows, null, 2));
+
+    // 出力用のデータをJSON化してコンソールに表示
+    const submissionData = formRows.map((row) => ({
+      ...row,
+      custom_fields: { ...row.custom_fields },
+    }));
+
+    console.log(JSON.stringify(submissionData, null, 2));
+    // 必要に応じてバックエンドへ送信
   };
+
+  // ローディング中の表示
+  if (loading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 5 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  // エラー時の表示
+  if (error) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 5 }}>
+        <Alert severity="error">{error}</Alert>
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -224,9 +216,14 @@ const Category: React.FC = () => {
         検査フォーム
       </Typography>
       {formRows.map((row, index) => (
-        <Grid container spacing={2} key={index}>
+        <Grid
+          container
+          spacing={2}
+          key={index}
+          sx={{ mb: 2, border: "1px solid #ccc", p: 2, borderRadius: 2 }}
+        >
           {customForm.map((field) => (
-            <Grid item xs={6} key={field.item}>
+            <Grid item xs={12} sm={6} key={field.item}>
               {field.component_type === "input" && (
                 <TextField
                   label={field.display_name}
@@ -236,7 +233,7 @@ const Category: React.FC = () => {
                   InputLabelProps={
                     field.type === "date" ? { shrink: true } : {}
                   }
-                  value={row[field.item as keyof FormValues] || ""}
+                  value={(row as any)[field.item] || ""}
                   onChange={(e) =>
                     handleRowChange(index, field.item, e.target.value)
                   }
@@ -250,12 +247,12 @@ const Category: React.FC = () => {
                     variant="outlined"
                     fullWidth
                     type={field.type}
-                    value={row.custom_fields[field.item as string] || ""}
+                    value={row.custom_fields[field.item] || ""}
                     onChange={(e) =>
                       handleRowChange(
                         index,
                         `custom_fields.${field.item}`,
-                        parseFloat(e.target.value)
+                        parseFloat(e.target.value) || 0
                       )
                     }
                   />
@@ -278,8 +275,8 @@ const Category: React.FC = () => {
                   variant="outlined"
                   fullWidth
                   value={
-                    row.custom_fields.formula !== null
-                      ? row.custom_fields.formula
+                    row.custom_fields[field.item] !== undefined
+                      ? row.custom_fields[field.item]
                       : ""
                   }
                   InputProps={{ readOnly: true }}
@@ -291,6 +288,7 @@ const Category: React.FC = () => {
                   type="file"
                   variant="outlined"
                   fullWidth
+                  inputProps={{ multiple: true }}
                   onChange={(e) =>
                     handleRowChange(
                       index,
@@ -319,6 +317,21 @@ const Category: React.FC = () => {
           送信
         </Button>
       </Box>
+
+      {/* エラーメッセージのSnackbar */}
+      <Snackbar
+        open={!!error}
+        autoHideDuration={6000}
+        onClose={() => setError(null)}
+      >
+        <Alert
+          onClose={() => setError(null)}
+          severity="error"
+          sx={{ width: "100%" }}
+        >
+          {error}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
