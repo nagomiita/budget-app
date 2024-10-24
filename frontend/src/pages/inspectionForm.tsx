@@ -55,6 +55,52 @@ const customForm: CustomFormField[] = [
     isInspectionData: true,
   },
   {
+    item: "custom_field3",
+    type: "number",
+    display_name: "検査データ3", // 新しいフィールド
+    component_type: "auto_post",
+    isInspectionData: true,
+  },
+  {
+    item: "formula",
+    type: "text",
+    display_name: "計算式",
+    component_type: "calculate",
+    formula: "(custom_field1 + custom_field3) / 2", // 平均を取る計算式
+  },
+  {
+    item: "productLot",
+    type: "text",
+    display_name: "製品ロット",
+    component_type: "input",
+  },
+  {
+    item: "inspector",
+    type: "text",
+    display_name: "検査者",
+    component_type: "input",
+  },
+  {
+    item: "inspectionDate",
+    type: "date",
+    display_name: "検査日",
+    component_type: "input",
+  },
+  {
+    item: "custom_field1",
+    type: "number",
+    display_name: "検査データ1",
+    component_type: "auto_post",
+    isInspectionData: true,
+  },
+  {
+    item: "custom_field2",
+    type: "number",
+    display_name: "検査データ2",
+    component_type: "auto_post",
+    isInspectionData: true,
+  },
+  {
     item: "formula",
     type: "text",
     display_name: "計算式",
@@ -108,30 +154,36 @@ const Category: React.FC = () => {
   };
 
   const calculateFormula = (index: number) => {
-    const { custom_field1, custom_field2 } = formRows[index].custom_fields;
+    const customFields = formRows[index].custom_fields;
     const formula = customForm.find(
       (field) => field.item === "formula"
     )?.formula;
 
-    try {
-      const result = Function(
-        "custom_field1",
-        "custom_field2",
-        `return ${formula}`
-      )(custom_field1, custom_field2);
-      setFormRows((prev) => {
-        const updatedRows = [...prev];
-        updatedRows[index] = {
-          ...updatedRows[index],
-          custom_fields: {
-            ...updatedRows[index].custom_fields,
-            formula: result, // 計算結果をcustom_fieldsに保存
-          },
-        };
-        return updatedRows;
-      });
-    } catch (error) {
-      console.error("計算式の評価中にエラーが発生しました:", error);
+    if (formula) {
+      // フィールド名に対応する変数を関数の引数として動的に生成
+      const fieldKeys = Object.keys(customFields);
+      const fieldValues = Object.values(customFields);
+
+      try {
+        // 計算式にフィールドの値を代入して評価
+        const result = Function(
+          ...fieldKeys,
+          `return ${formula}`
+        )(...fieldValues);
+        setFormRows((prev) => {
+          const updatedRows = [...prev];
+          updatedRows[index] = {
+            ...updatedRows[index],
+            custom_fields: {
+              ...updatedRows[index].custom_fields,
+              formula: result, // 計算結果をcustom_fieldsに保存
+            },
+          };
+          return updatedRows;
+        });
+      } catch (error) {
+        console.error("計算式の評価中にエラーが発生しました:", error);
+      }
     }
   };
 
