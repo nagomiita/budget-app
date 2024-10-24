@@ -85,8 +85,6 @@ const Category: React.FC = () => {
     },
   ]);
 
-  const [calculatedResults, setCalculatedResults] = useState<number[]>([]);
-
   const handleRowChange = (
     index: number,
     field: keyof FormValues | string,
@@ -122,10 +120,13 @@ const Category: React.FC = () => {
         "custom_field2",
         `return ${formula}`
       )(custom_field1, custom_field2);
-      setCalculatedResults((prev) => {
-        const updatedResults = [...prev];
-        updatedResults[index] = result;
-        return updatedResults;
+      setFormRows((prev) => {
+        const updatedRows = [...prev];
+        updatedRows[index] = {
+          ...updatedRows[index],
+          formula: result, // 計算結果を保存
+        };
+        return updatedRows;
       });
     } catch (error) {
       console.error("計算式の評価中にエラーが発生しました:", error);
@@ -152,7 +153,6 @@ const Category: React.FC = () => {
         formula: "custom_field1 * custom_field2",
       },
     ]);
-    setCalculatedResults((prev) => [...prev, 0]);
   };
 
   const handleSubmit = (event: React.FormEvent) => {
@@ -223,11 +223,7 @@ const Category: React.FC = () => {
                   label={field.display_name}
                   variant="outlined"
                   fullWidth
-                  value={
-                    calculatedResults[index] !== null
-                      ? calculatedResults[index]
-                      : ""
-                  }
+                  value={row.formula !== null ? row.formula : ""}
                   InputProps={{ readOnly: true }}
                 />
               )}
