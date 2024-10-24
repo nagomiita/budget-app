@@ -7,9 +7,8 @@ type FormValues = {
   inspector: string;
   inspectionDate: string;
   custom_fields: {
-    [key: string]: number;
+    [key: string]: number; // string型のキーを許容
   };
-  formula: string;
   inspectionFile?: FileList;
 };
 
@@ -80,8 +79,8 @@ const Category: React.FC = () => {
       custom_fields: {
         custom_field1: 0,
         custom_field2: 0,
+        formula: 0,
       },
-      formula: "",
     },
   ]);
 
@@ -124,7 +123,10 @@ const Category: React.FC = () => {
         const updatedRows = [...prev];
         updatedRows[index] = {
           ...updatedRows[index],
-          formula: result, // 計算結果を保存
+          custom_fields: {
+            ...updatedRows[index].custom_fields,
+            formula: result, // 計算結果をcustom_fieldsに保存
+          },
         };
         return updatedRows;
       });
@@ -149,8 +151,8 @@ const Category: React.FC = () => {
         custom_fields: {
           custom_field1: 0,
           custom_field2: 0,
+          formula: 0, // 初期値を設定
         },
-        formula: "custom_field1 * custom_field2",
       },
     ]);
   };
@@ -223,7 +225,11 @@ const Category: React.FC = () => {
                   label={field.display_name}
                   variant="outlined"
                   fullWidth
-                  value={row.formula !== null ? row.formula : ""}
+                  value={
+                    row.custom_fields.formula !== null
+                      ? row.custom_fields.formula
+                      : ""
+                  }
                   InputProps={{ readOnly: true }}
                 />
               )}
