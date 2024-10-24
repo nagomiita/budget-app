@@ -18,7 +18,6 @@ type CustomFormField = {
   type: string;
   display_name: string;
   component_type: "input" | "auto_post" | "calculate" | "file_input";
-  required: boolean;
   formula?: string;
   isInspectionData?: boolean;
 };
@@ -29,36 +28,31 @@ const customForm: CustomFormField[] = [
     type: "text",
     display_name: "製品ロット",
     component_type: "input",
-    required: true,
   },
   {
     item: "inspector",
     type: "text",
     display_name: "検査者",
     component_type: "input",
-    required: true,
   },
   {
     item: "inspectionDate",
     type: "date",
     display_name: "検査日",
     component_type: "input",
-    required: true,
   },
   {
-    item: "inspectionData1",
+    item: "custom_field1",
     type: "number",
     display_name: "検査データ1",
     component_type: "auto_post",
-    required: true,
     isInspectionData: true,
   },
   {
-    item: "inspectionData2",
+    item: "custom_field2",
     type: "number",
     display_name: "検査データ2",
     component_type: "auto_post",
-    required: true,
     isInspectionData: true,
   },
   {
@@ -66,16 +60,15 @@ const customForm: CustomFormField[] = [
     type: "text",
     display_name: "計算式",
     component_type: "calculate",
-    required: true,
-    formula: "inspectionData1 * inspectionData2",
+    formula: "custom_field1 * custom_field2",
   },
-  {
-    item: "inspectionFile",
-    type: "file",
-    display_name: "検査データファイル",
-    component_type: "file_input",
-    required: true,
-  },
+  // {
+  //   item: "inspectionFile",
+  //   type: "file",
+  //   display_name: "検査データファイル",
+  //   component_type: "file_input",
+  //   required: true,
+  // },
 ];
 
 const Category: React.FC = () => {
@@ -85,8 +78,8 @@ const Category: React.FC = () => {
       inspector: "",
       inspectionDate: format(new Date(), "yyyy-MM-dd"),
       custom_fields: {
-        inspectionData1: 0,
-        inspectionData2: 0,
+        custom_field1: 0,
+        custom_field2: 0,
       },
       formula: "",
     },
@@ -118,17 +111,17 @@ const Category: React.FC = () => {
   };
 
   const calculateFormula = (index: number) => {
-    const { inspectionData1, inspectionData2 } = formRows[index].custom_fields;
+    const { custom_field1, custom_field2 } = formRows[index].custom_fields;
     const formula = customForm.find(
       (field) => field.item === "formula"
     )?.formula;
 
     try {
       const result = Function(
-        "inspectionData1",
-        "inspectionData2",
+        "custom_field1",
+        "custom_field2",
         `return ${formula}`
-      )(inspectionData1, inspectionData2);
+      )(custom_field1, custom_field2);
       setCalculatedResults((prev) => {
         const updatedResults = [...prev];
         updatedResults[index] = result;
@@ -153,10 +146,10 @@ const Category: React.FC = () => {
         inspector: "",
         inspectionDate: format(new Date(), "yyyy-MM-dd"),
         custom_fields: {
-          inspectionData1: 0,
-          inspectionData2: 0,
+          custom_field1: 0,
+          custom_field2: 0,
         },
-        formula: "inspectionData1 * inspectionData2",
+        formula: "custom_field1 * custom_field2",
       },
     ]);
     setCalculatedResults((prev) => [...prev, 0]);
