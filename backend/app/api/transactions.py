@@ -1,8 +1,9 @@
 import logging  # ロギング用のインポート
-from typing import List
+from typing import List, Optional
 
 from core.database import get_db
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 from schemas.transaction import Transaction, TransactionCreate, TransactionResponse
 from services.transaction import (
     create_transaction,
@@ -108,3 +109,87 @@ def delete_transaction_endpoint(transaction_id: int, db: Session = Depends(get_d
     except Exception as e:
         logger.error(f"An unexpected error occurred: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
+
+
+# Pydanticモデルの定義
+class CustomFormField(BaseModel):
+    item: str  # `keyof FormValues | string` に対応
+    type: str
+    display_name: str
+    component_type: str  # "input" | "auto_post" | "calculate" | "file_input"
+    formula: Optional[str] = None
+    isInspectionData: Optional[bool] = False
+
+
+# ダミーデータとしてのcustomForm
+custom_form_data = [
+    {
+        "item": "productLot",
+        "type": "text",
+        "display_name": "製品ロット",
+        "component_type": "input",
+    },
+    {
+        "item": "inspector",
+        "type": "text",
+        "display_name": "検査者",
+        "component_type": "input",
+    },
+    {
+        "item": "inspectionDate",
+        "type": "date",
+        "display_name": "検査日",
+        "component_type": "input",
+    },
+    {
+        "item": "formula1",
+        "type": "text",
+        "display_name": "平均検査データ",
+        "component_type": "calculate",
+        "formula": "(custom_field1 + custom_field3) / 2",
+    },
+    {
+        "item": "custom_field1",
+        "type": "number",
+        "display_name": "検査データ1",
+        "component_type": "auto_post",
+        "isInspectionData": True,
+    },
+    {
+        "item": "custom_field2",
+        "type": "number",
+        "display_name": "検査データ2",
+        "component_type": "auto_post",
+        "isInspectionData": True,
+    },
+    {
+        "item": "custom_field3",
+        "type": "number",
+        "display_name": "検査データ3",
+        "component_type": "auto_post",
+        "isInspectionData": True,
+    },
+    {
+        "item": "formula2",
+        "type": "text",
+        "display_name": "総合検査データ",
+        "component_type": "calculate",
+        "formula": "custom_field1 + custom_field2",
+    },
+    # 必要に応じてファイル入力フィールドを追加
+    # {
+    #     "item": "inspectionFile",
+    #     "type": "file",
+    #     "display_name": "検査データファイル",
+    #     "component_type": "file_input",
+    #     "required": True
+    # }
+]
+
+
+@router.get("/api/customForm", response_model=List[CustomFormField])
+async def get_custom_form():
+    """
+    customFormを提供するエンドポイント。
+    """
+    return custom_form_data
