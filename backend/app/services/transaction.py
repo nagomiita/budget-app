@@ -1,6 +1,6 @@
 import logging  # ロギング用のインポート
 
-from models.transaction import Transaction
+from models.transaction import Category, Transaction
 from schemas.transaction import TransactionCreate
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
@@ -11,7 +11,11 @@ logger = logging.getLogger(__name__)
 
 
 def get_transactions(db: Session):
-    return db.query(Transaction).all()
+    return (
+        db.query(Transaction, Category.name)
+        .join(Category, Transaction.category == Category.id)
+        .all()
+    )
 
 
 def create_transaction(db: Session, transaction: TransactionCreate):

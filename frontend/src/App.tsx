@@ -7,6 +7,8 @@ import { theme } from "./theme/theme";
 import { ThemeProvider } from "@emotion/react";
 import { CssBaseline } from "@mui/material";
 import { AppContextProvider } from "./context/AppContext";
+import Category from "./pages/Category";
+import InspectionForm from "./pages/inspectionForm";
 
 function App() {
   return (
@@ -18,6 +20,8 @@ function App() {
             <Route path="/" element={<AppLayout />}>
               <Route index element={<Home />} />
               <Route path="/report" element={<Report />} />
+              <Route path="/category" element={<Category />} />
+              <Route path="/form" element={<InspectionForm />} />
               <Route path="*" element={<NoMatch />} />
             </Route>
           </Routes>
