@@ -33,6 +33,9 @@ const SideBar = ({
   const MenuItems: menuItem[] = [
     { text: "Home", path: "/", icon: HomeIcon },
     { text: "月間レポート", path: "/report", icon: SignalCellularAltIcon },
+    { text: "カテゴリー設定", path: "/category", icon: SignalCellularAltIcon },
+    { text: "フォーム", path: "/form", icon: SignalCellularAltIcon },
+
   ];
 
   const baseLinkStyle: CSSProperties = {
